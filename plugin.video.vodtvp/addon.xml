@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.vodtvp" name="VOD.TVP.pl" version="0.1" provider-name="Merle">
+<addon id="plugin.video.vodtvp" name="VOD.TVP.pl" version="0.1.0" provider-name="Merle">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
   </requires>
@@ -9,8 +9,8 @@
   <extension point="xbmc.addon.metadata">
     <summary lang="pl">Wtyczka VOD.TVP.PL</summary>
     <summary lang="en">VOD.TVP.PL Plugin</summary>
-    <description lang="pl">Wtyczka umożliwiająca oglądanie VOD.TVP.PL</description>
-    <description lang="en">Allowing You to watch VOD.TVP.PL</description>
+    <description lang="pl">Wtyczka umożliwiająca oglądanie VOD.TVP.PL dla Kodi 18.9</description>
+    <description lang="en">Allowing You to watch VOD.TVP.PL for Kodi 18.9</description>
     <disclaimer lang="pl"></disclaimer>
     <language></language>
     <platform>all</platform>

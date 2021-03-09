@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import xbmc
+
+
 import os
 from urlparse import parse_qsl
 from datetime import datetime
@@ -10,10 +13,14 @@ import xbmcaddon
 import random
 
 from lxml import html 
-import requests
+
+import urllib
 import urllib2
+
 import json
 import time
+
+
 
 __addon__ = 'plugin.video.vodtvp'
 __settings__ = xbmcaddon.Addon(__addon__)
@@ -83,17 +90,26 @@ def log(txt, level='debug'):
 
     message = '%s: %s' % (ADDON_NAME, txt)
     #log: off
-    #xbmc.log(msg=message, level=logLevel)
+    xbmc.log(msg=message, level=logLevel)
 
 def get_request_url( url, params={} ):
     log_notice("get_request_url( %s, %s ):" % (url, params))
+    
+    url_values = urllib.urlencode(params)
 
-    r = requests.get(url, params=params, headers=http_headers, timeout=http_timeout)
-    if r.status_code != requests.codes.ok: # Uh-oh!
-        log_error("Error: %s: %s" % (r.status_code, url))
-        return
+    url = url + '?' + url_values
+
+    f = urllib2.urlopen(url)
+    r = f.read()
+    f.close()
+
+    #r = requests.get(url, params=params, headers=http_headers, timeout=http_timeout)
+    #if r.status_code != requests.codes.ok: # Uh-oh!
+    #    log_error("Error: %s: %s" % (r.status_code, url))
+    #    return
+
     #save_cookies_lwp(r.cookies)
-
+    
     return r
 
 def check_url_type(url_to_check):
@@ -138,7 +154,7 @@ def check_url_type(url_to_check):
 
     r = get_request_url ( BASE_URL + url_to_check )
 
-    data = html.fromstring(r.content)
+    data = html.fromstring(r)
 
     #ok
     if page_type == 'category':
@@ -219,7 +235,7 @@ def get_categories():
     
     page = get_request_url(BASE_URL)
 
-    root = html.fromstring(page.content)
+    root = html.fromstring(page)
     data = root.xpath('//div[@class="subMenu"]/ul/li/a')
 
     for i in range(len(data)):
@@ -381,7 +397,7 @@ def get_listing( listing_url ):
 
     pagedata = get_request_url(BASE_URL + listing_url + LIST_SORT_ORDER + '1')
 
-    root = html.fromstring(pagedata.content)
+    root = html.fromstring(pagedata)
     data = root.xpath('//section[@class="pagePagination text-center"]')
     sections = list(data[0].iter("section"))
     pages = 1
@@ -422,7 +438,7 @@ def get_listing( listing_url ):
         page = page + 1
         if pages >= page:
             pagedata = get_request_url(BASE_URL + listing_url + LIST_SORT_ORDER + str(page))
-            root = html.fromstring(pagedata.content)
+            root = html.fromstring(pagedata)
     return LISTING
 def list_listing( listing_url):
     """
@@ -489,7 +505,7 @@ def get_episodes( episodes_url, season = '0'):
     page = 1
     datapage = get_request_url(BASE_URL + episodes_url + EPISODES_SORT_ORDER + season + '&page=' + str(page))
 
-    root = html.fromstring(datapage.content)
+    root = html.fromstring(datapage)
     data = root.xpath('//section[@class="pagePagination text-center"]')
     sections = list(data[0].iter("section"))
     pages = 1
@@ -538,7 +554,7 @@ def get_episodes( episodes_url, season = '0'):
         page = page + 1
         if pages >= page:
             datapage = get_request_url( BASE_URL + episodes_url + EPISODES_SORT_ORDER + season + '&page=' + str(page))
-            root = html.fromstring(datapage.content)
+            root = html.fromstring(datapage)
 
     return VIDEOS
 
@@ -701,7 +717,7 @@ def get_video_url(website_url):
     URL = BASE_URL + website_url
     vr = get_request_url(URL)
 
-    hdata = html.fromstring(vr.content)
+    hdata = html.fromstring(vr)
     xdata = hdata.xpath('//div[@id="JS-TVPlayer2-Wrapper"]')[0]
     
     ldata = list(xdata.iter("div"))[0]
@@ -715,7 +731,7 @@ def get_video_url(website_url):
     }
     jr = get_request_url(URL, params)
 
-    jdata = json.loads( jr.content.encode('utf-8')  )
+    jdata = json.loads( jr ) 
 
     URL = BASE_URL + PLAYER2_URL
     params = {
@@ -725,7 +741,7 @@ def get_video_url(website_url):
     }
     pr = get_request_url(URL, params)
 
-    content = pr.content.encode('utf-8')
+    content = pr.encode('utf-8')
 
     start_src = content.find("(")+1
     stop_src = content.rfind(")")
